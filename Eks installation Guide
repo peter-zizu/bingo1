@@ -1,157 +1,170 @@
-How to create an EKS cluster using AWS Console | Create node group | Configure Kubernetes cluster
+# How to Create an EKS Cluster Using AWS Console | Create Node Group | Configure Kubernetes Cluster
 
+## Step 1: Set Up an EKS Management Host in AWS
 
-# Step - 1 : Create EKS Management Host in AWS #
+### Prerequisites
+Before creating an EKS cluster, ensure you have the following:
 
+- **AWS Account** – Sign up for an AWS account and configure an EC2 instance.
+- **kubectl** – Install kubectl for interacting with Kubernetes clusters.
+- **AWS CLI** – Install and configure the AWS CLI to interact with AWS services.
+- **eksctl** – Install eksctl, the command-line tool for creating and managing Amazon EKS clusters.
 
-#To install an EKS (Elastic Kubernetes Service) cluster with 2 nodes in AWS, follow these steps:
+### Step 1.1: Launch an Ubuntu EC2 Instance
+1. Open the **AWS Management Console** → Navigate to **EC2** → Launch an Instance.
+2. Choose **Ubuntu 20.04 LTS** (or the latest version).
+3. Select **Instance Type**: `t2.micro` (for demo purposes).
+4. Configure **Key Pair & Security Groups**.
+5. Launch the instance and connect via **SSH**.
 
+### Step 1.2: Install AWS CLI on the EC2 Instance
+Run the following commands on your EC2 instance to install the AWS CLI:
 
-Prerequisites
-1. AWS Account: Make sure you have an AWS account and configure one ec2 instance
-2. kubectl: Install kubectl. 
-3. AWS CLI: Install and configure the AWS CLI.
-4. eksctl: Install eksctl.
-
-Step-1
-
-1) Launch new Ubuntu VM using AWS Ec2 ( t2.micro )
-
-2) Install AWS CLI latest version using below commands 
-
-```
-sudo apt install unzip
+```sh
+sudo apt update
+sudo apt install unzip -y
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
 aws --version
-	
----------------------------------------------------------------------------------------------------------------
-How kubectl and eksctl Work Together?
-1️⃣ Use eksctl to create the EKS cluster ✅
-2️⃣ Use kubectl to deploy & manage applications ✅
-3️⃣ Use kubectl for day-to-day operations ✅
-
----------------------------------------------------------------------------------------------------------------
-
-
-2) Connect to machine and install kubectl using below commands 
-1️⃣ What is kubectl?
-👉 kubectl is the command-line tool for interacting with Kubernetes clusters.
-It allows you to:
-✔ Deploy applications
-✔ Manage resources (pods, services, deployments, etc.)
-✔ Monitor cluster health
-✔ Scale workloads
-✔ Debug issues 
 ```
+
+## Step 2: Install kubectl and eksctl
+
+### Step 2.1: Install kubectl
+kubectl is the command-line tool for interacting with Kubernetes clusters. It allows you to:
+✔ Deploy applications  
+✔ Manage resources (pods, services, deployments, etc.)  
+✔ Monitor cluster health  
+✔ Scale workloads  
+✔ Debug issues  
+
+Run the following commands to install kubectl:
+
+```sh
 curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin
 kubectl version --client
 kubectl version --short --client
 ```
-```
 
-4) Install eksctl using below commands
+### Step 2.2: Install eksctl
+`eksctl` is a CLI tool for managing Amazon EKS clusters. It simplifies cluster creation, scaling, and deletion.
 
-What is eksctl?
-👉 eksctl is a CLI tool for managing Amazon EKS clusters (Elastic Kubernetes Service).
-It simplifies cluster creation, scaling, and deletion on AWS.
+Why use eksctl?
+✔ Easily create & manage EKS clusters  
+✔ Automates networking, IAM roles, and node groups  
+✔ Works seamlessly with AWS CLI  
 
-Why Use eksctl?
-✔ Easily create & manage EKS clusters
-✔ Automates networking, IAM roles, and node groups
-✔ Works seamlessly with AWS CLI
+Run the following commands to install eksctl:
 
-```
+```sh
 curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
 sudo mv /tmp/eksctl /usr/local/bin
 eksctl version
 ```
-# Step - 2 : Create User & add policies as below 
-Create IAM role & attach to EKS Management Host #
-Create user 
-bingouser
 
-1) Create New Role using IAM service ( Select Usecase - ec2 ) 	
-2) Add below permissions for the role <br/>
-	- IAM - fullaccess <br/>
-	- VPC - fullaccess <br/>
-	- EC2 - fullaccess  <br/>
-	- CloudFomration - fullaccess  <br/>
-	- Administrator - acces <br/>
+## Step 3: Create an IAM Role for EKS Management Host
 
-		
+### Step 3.1: Create a New IAM Role
+1. Open **AWS Console** → Navigate to **IAM** → **Roles** → **Create Role**.
+2. Select **EC2** as the **Use Case**.
+3. Attach the following permissions to the role:
+   - `IAMFullAccess`
+   - `VPCFullAccess`
+   - `EC2FullAccess`
+   - `CloudFormationFullAccess`
+   - `AdministratorAccess`
+4. Name the role **eks-management-role** and create it.
 
+### Step 3.2: Attach IAM Role to EC2 Instance
+1. Navigate to **EC2 Console**.
+2. Select your **EKS Management Host** instance.
+3. Click **Actions** → **Security** → **Modify IAM Role**.
+4. Attach the `eks-management-role` to the instance.
 
-4) Attach created role to EKS Management Host (Select EC2 => Click on Security => Modify IAM Role => attach IAM role we have created) 
+## Step 4: Create an EKS Cluster Using eksctl
+Use the following command to create an EKS cluster with two nodes:
 
-# Step - 3 : Create EKS Cluster using eksctl # 
-**Syntax:** 
+**General Syntax:**
+```sh
+eksctl create cluster --name <cluster-name> \
+  --region <region-name> \
+  --node-type <instance-type> \
+  --nodes-min 2 \
+  --nodes-max 2 \
+  --zones <AZ-1>,<AZ-2>
+```
+```
+**Example: Creating a Cluster in N. Virginia Region**
+```sh
+eksctl create cluster --name chibz-devops-cluster1 \
+  --region us-east-1 \
+  --node-type t2.medium \
+  --zones us-east-1a,us-east-1b
+```
 
-eksctl create cluster --name cluster-name  \
---region region-name \
---node-type instance-type \
---nodes-min 2 \
---nodes-max 2 \ 
---zones <AZ-1>,<AZ-2>
+### Step 4.1: Verify Cluster Creation
+Cluster creation takes **5 to 10 minutes**. Once completed, verify the cluster using:
 
-
-`	
-## Mumbai: <br/>
-`
-eksctl create cluster --name cloudaseem-cluster4 --region ap-south-1 --node-type t2.medium  --zones ap-south-1a,ap-south-1b
-
-
-`
-## N. Virgina: <br/>
-`
-eksctl create cluster --name cloudaseem-cluster4 --region us-east-1 --node-type t2.medium  --zones us-east-1a,us-east-1b
-
-## Note: Cluster creation will take 5 to 10 mins of time (we have to wait). After cluster created we can check nodes using below command.
-
-
-A. Verify the Cluster
-After the cluster is created, verify that kubectl is configured to use the new cluster:
-
+```sh
 kubectl get svc
+```
 
+**Expected Output:**
+```sh
 NAME             TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 kubernetes       ClusterIP   10.100.0.1    <none>        443/TCP   1m
+```
 
+## Step 5: Verify Nodes
+Check if the nodes are running:
 
+```sh
+kubectl get nodes
+```
 
-
-B. Check the Nodes
-Check that the nodes are up and running:
-`
- kubectl get nodes  
-`
-
+**Expected Output:**
+```sh
 NAME                            STATUS   ROLES    AGE     VERSION
 ip-192-168-xx-xx.ec2.internal   Ready    <none>   5m      v1.17.12-eks-7684af
 ip-192-168-xx-xx.ec2.internal   Ready    <none>   5m      v1.17.12-eks-7684af
+```
 
-B. Create manifest.yml file and execute this command
+## Step 6: Deploy an Application
+1. Create a **manifest.yml** file.
+2. Apply the manifest to deploy a sample application:
+
+```sh
 kubectl apply -f manifest.yml
+```
 
+3. Verify the deployed pods:
 
+```sh
 kubectl get pods
+```
 
+4. Describe a specific pod:
+
+```sh
 kubectl describe pod <pod-name>
+```
 
+5. View pod logs:
+
+```sh
 kubectl logs <pod-name>
-
-
-You have successfully created an EKS cluster with 2 nodes in AWS using eksctl. You can now deploy applications to your Kubernetes cluster.
-
-## Note: We should be able to see EKS cluster nodes here.**
-
-# We are done with our Setup #
-	
-## Step - 4 : After your practise, delete Cluster and other resources we have used in AWS Cloud to avoid billing ##
-
 ```
-eksctl delete cluster --name cloudaseem-cluster4 --region ap-south-1
+
+## Step 7: Clean Up Resources
+After completing your practice, delete the cluster and other resources to avoid AWS charges:
+
+```sh
+eksctl delete cluster --name  --region ap-south-1
 ```
+
+## Conclusion
+🎉 Congratulations! You have successfully created an EKS cluster with two nodes using `eksctl`. Now, you can deploy and manage applications in your Kubernetes cluster.
+
