@@ -156,15 +156,16 @@ kubectl describe pod <pod-name>
 
 ```sh
 kubectl logs <pod-name>
+
+
+You have successfully created an EKS cluster with 2 nodes in AWS using eksctl. You can now deploy applications to your Kubernetes cluster.
+
+## Note: We should be able to see EKS cluster nodes here.**
+
+# We are done with our Setup #
+	
+## Step - 4 : After your practise, delete Cluster and other resources we have used in AWS Cloud to avoid billing ##
+
 ```
-
-## Step 7: Clean Up Resources
-After completing your practice, delete the cluster and other resources to avoid AWS charges:
-
-```sh
-eksctl delete cluster --name  --region ap-south-1
+eksctl delete cluster --name chibz-devops-cluster1 --region us-east-1
 ```
-
-## Conclusion
-🎉 Congratulations! You have successfully created an EKS cluster with two nodes using `eksctl`. Now, you can deploy and manage applications in your Kubernetes cluster.
-
