@@ -1,3 +1,6 @@
+#!/bin/bash
+#this Script belong to Cloudaseem Youtube channel #####
+
 # 1. jenkins installation on ubuntu 
 sudo apt update -y
 sleep 5
